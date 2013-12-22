@@ -5,8 +5,67 @@
 
 #include "ofxLIC.h"
 
+//------------------------------------------------
+ofxLICVectorField::ofxLICVectorField() {
+    width = 0;
+    height = 0;
+}
+
+ofxLICVectorField::~ofxLICVectorField() {
+    //
+}
+
+void ofxLICVectorField::setup(int w, int h) {
+    width = w;
+    height = h;
+    size = width * height;
+    vecs.resize(size, ofVec2f());
+}
+
+void ofxLICVectorField::setVector(float x, float y, ofVec2f & vec) {
+    int xInt, yInt;
+    xInt = ofClamp(x, 0, width-1);
+    yInt = ofClamp(y, 0, height-1);
+    int i = yInt * width + xInt;
+    
+    vecs[i].set(vec);
+}
+
+void ofxLICVectorField::setVector(vector<ofVec2f> & vecsToCopy) {
+    vecs = vecsToCopy;
+    vecs.resize(size, ofVec2f());
+}
+
+ofVec2f & ofxLICVectorField::getVector(ofVec2f & p) {
+    return getVector(p.x, p.y);
+}
+
+ofVec2f & ofxLICVectorField::getVector(float x, float y) {
+    int xInt, yInt;
+    xInt = ofClamp(x, 0, width-1);
+    yInt = ofClamp(y, 0, height-1);
+    int i = yInt * width + xInt;
+    
+    vecValue.set(vecs[i]);
+    
+    return vecValue;
+}
+
+int ofxLICVectorField::getWidth() {
+    return width;
+}
+
+int ofxLICVectorField::getHeight() {
+    return height;
+}
+
+//------------------------------------------------
 ofxLIC::ofxLIC() {
-    setVectorData(NULL, 0, 0);
+    
+    vecField = NULL;
+    bVecFieldExternal = false;
+    
+    
     setPosition(0, 0);
     setStep(1.0);
     
@@ -20,20 +79,26 @@ ofxLIC::ofxLIC() {
 }
 
 ofxLIC::~ofxLIC() {
-    //
+    if(vecField != NULL && bVecFieldExternal == false) {
+        delete vecField;
+        vecField = NULL;
+    }
 }
 
-//////////////////////////////////////////////////
-//  SETUP.
-//////////////////////////////////////////////////
-void ofxLIC::setup() {
-    //
+//------------------------------------------------
+void ofxLIC::setup(int w, int h) {
+    vecField = new ofxLICVectorField();
+    vecField->setup(w, h);
+    bVecFieldExternal = false;
 }
 
-void ofxLIC::setVectorData(ofVec2f * vecField, int vecFieldW, int vecFieldH) {
+void ofxLIC::setVectorField(ofxLICVectorField * vecField) {
     this->vecField = vecField;
-    this->width = vecFieldW;
-    this->height = vecFieldH;
+    bVecFieldExternal = true;
+}
+
+void ofxLIC::setVector(float x, float y, ofVec2f & vec) {
+    vecField->setVector(x, y, vec);
 }
 
 void ofxLIC::setPosition(float x, float y) {
@@ -82,44 +147,29 @@ void ofxLIC::update() {
 
 void ofxLIC::RK(ofVec2f & p, double h) {
     ofVec2f v;
+    ofVec2f v2;
     ofVec2f k1, k2, k3, k4;
     
-    v = getVector(p);
+    v = vecField->getVector(p);
     v.normalize();
     
     k1 = v * h;
-    v = getVector(p + k1 * 0.5);
+    v2 = p + k1 * 0.5;
+    v = vecField->getVector(v2);
     v.normalize();
     
     k2 = v * h;
-    v = getVector(p + k2 * 0.5);
+    v2 = p + k2 * 0.5;
+    v = vecField->getVector(v2);
     v.normalize();
     
     k3 = v * h;
-    v = getVector(p + k3);
+    v2 = p + k3;
+    v = vecField->getVector(v2);
     v.normalize();
     
     k4 = v * h;
     p += k1/6 + k2/3 + k3/3 + k4/6;
-}
-
-ofVec2f ofxLIC::getVector(const ofVec2f & p) {
-    ofVec2f v;
-    
-    int x, y;
-    x = ((int)p.x + width) % width;
-    y = ((int)p.y + height) % height;
-    
-    if((x < 0)      ||
-       (x >= width) ||
-       (y < 0)      ||
-       (y >= height)) {
-        return v;
-    }
-    
-    int i = y * width + x;
-        
-    return ofVec2f(vecField[i].x, vecField[i].y);
 }
 
 //////////////////////////////////////////////////
