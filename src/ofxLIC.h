@@ -1,5 +1,5 @@
 //
-//  ofxStreamline.h
+//  ofxLIC.h
 //  Created by lukasz karluk on 22/03/11.
 //
 
@@ -7,12 +7,12 @@
 
 #include "ofMain.h"
 
-class ofxStreamline : public ofBaseApp {
+class ofxLIC : public ofBaseApp {
   
 public:
     
-    ofxStreamline();
-    ~ofxStreamline();
+    ofxLIC();
+    ~ofxLIC();
     
     void setup();
     void update();

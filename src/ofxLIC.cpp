@@ -1,14 +1,11 @@
 //
-//  ofxStreamline.cpp
-//  opencvExample
-//
+//  ofxLIC.cpp
 //  Created by lukasz karluk on 22/03/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
 
-#include "ofxStreamline.h"
+#include "ofxLIC.h"
 
-ofxStreamline::ofxStreamline() {
+ofxLIC::ofxLIC() {
     setVectorData(NULL, 0, 0);
     setPosition(0, 0);
     setStep(1.0);
@@ -22,29 +19,29 @@ ofxStreamline::ofxStreamline() {
     stripWidth = 3;
 }
 
-ofxStreamline::~ofxStreamline() {
+ofxLIC::~ofxLIC() {
     //
 }
 
 //////////////////////////////////////////////////
 //  SETUP.
 //////////////////////////////////////////////////
-void ofxStreamline::setup() {
+void ofxLIC::setup() {
     //
 }
 
-void ofxStreamline::setVectorData(ofVec2f * vecField, int vecFieldW, int vecFieldH) {
+void ofxLIC::setVectorData(ofVec2f * vecField, int vecFieldW, int vecFieldH) {
     this->vecField = vecField;
     this->width = vecFieldW;
     this->height = vecFieldH;
 }
 
-void ofxStreamline::setPosition(float x, float y) {
+void ofxLIC::setPosition(float x, float y) {
     pos.x = x;
     pos.y = y;
 }
 
-void ofxStreamline::setStep(float step) {
+void ofxLIC::setStep(float step) {
     this->step = step;
     dotSize = step * 0.5;
 }
@@ -53,7 +50,7 @@ void ofxStreamline::setStep(float step) {
 //  UPDATE.
 //////////////////////////////////////////////////
 
-void ofxStreamline::update() {
+void ofxLIC::update() {
     ofVec2f v;
     int s = stepNum;
     int t = s * 2 + 1;
@@ -83,7 +80,7 @@ void ofxStreamline::update() {
     }
 }
 
-void ofxStreamline::RK(ofVec2f & p, double h) {
+void ofxLIC::RK(ofVec2f & p, double h) {
     ofVec2f v;
     ofVec2f k1, k2, k3, k4;
     
@@ -106,7 +103,7 @@ void ofxStreamline::RK(ofVec2f & p, double h) {
     p += k1/6 + k2/3 + k3/3 + k4/6;
 }
 
-ofVec2f ofxStreamline::getVector(const ofVec2f & p) {
+ofVec2f ofxLIC::getVector(const ofVec2f & p) {
     ofVec2f v;
     
     int x, y;
@@ -129,7 +126,7 @@ ofVec2f ofxStreamline::getVector(const ofVec2f & p) {
 //  DRAW.
 //////////////////////////////////////////////////
 
-void ofxStreamline::drawLines(bool bSmooth) {
+void ofxLIC::drawLines(bool bSmooth) {
     if(bSmooth) {
         glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
         glEnable(GL_LINE_SMOOTH);
@@ -166,7 +163,7 @@ void ofxStreamline::drawLines(bool bSmooth) {
     delete[] colr;
 }
 
-void ofxStreamline::drawStrip(bool bSmooth) {
+void ofxLIC::drawStrip(bool bSmooth) {
     if(bSmooth) {
         glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
         glEnable(GL_LINE_SMOOTH);
@@ -309,7 +306,7 @@ void ofxStreamline::drawStrip(bool bSmooth) {
     delete[] colr_line;
 }
 
-void ofxStreamline::drawDots() {
+void ofxLIC::drawDots() {
     float s = step * 0.5;
     
     int t = points.size();
