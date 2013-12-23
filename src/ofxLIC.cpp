@@ -19,6 +19,7 @@ void ofxLICVectorField::setup(int w, int h) {
     width = w;
     height = h;
     size = width * height;
+    bounds.set(0, 0, w, h);
     vecs.resize(size, ofVec2f());
 }
 
@@ -68,6 +69,10 @@ int ofxLICVectorField::getSize() {
     return size;
 }
 
+const ofRectangle & ofxLICVectorField::getBounds() {
+    return bounds;
+}
+
 void ofxLICVectorField::draw(int stride, float scale) {
     int w = getWidth();
     int h = getHeight();
@@ -86,6 +91,7 @@ void ofxLICVectorField::draw(int stride, float scale) {
 ofxLIC::ofxLIC() {
     vecField = NULL;
     bVecFieldExternal = false;
+    bCropToBounds = false;
 }
 
 ofxLIC::~ofxLIC() {
@@ -116,6 +122,14 @@ void ofxLIC::setVector(float x, float y, ofVec2f & vec) {
     vecField->setVector(x, y, vec);
 }
 
+void ofxLIC::setVector(vector<ofVec2f> & vecs) {
+    vecField->setVector(vecs);
+}
+
+void ofxLIC::setCropToBounds(bool value) {
+    bCropToBounds = value;
+}
+
 //------------------------------------------------
 ofPolyline & ofxLIC::getStreamline(const ofVec2f & pos, int numOfPoints, float stepSize) {
     return getStreamline(pos.x, pos.y, numOfPoints, stepSize);
@@ -123,6 +137,8 @@ ofPolyline & ofxLIC::getStreamline(const ofVec2f & pos, int numOfPoints, float s
 
 ofPolyline & ofxLIC::getStreamline(float x, float y, int numOfPoints, float stepSize) {
 
+    const ofRectangle & bounds = vecField->getBounds();
+    
     vector<ofVec3f> & points = streamline.getVertices();
     if(points.size() != numOfPoints) {
         points.resize(numOfPoints, ofVec2f());
@@ -130,10 +146,18 @@ ofPolyline & ofxLIC::getStreamline(float x, float y, int numOfPoints, float step
     
     points[0].set(x, y);
     
-    ofVec2f v(x, y);
+    ofVec2f p(x, y);
     for(int i=1; i<numOfPoints; i++) {
-        RK(v, stepSize);
-        points[i].set(v);
+        RK(p, stepSize);
+        
+        if(bCropToBounds == true) {
+            if(bounds.inside(p) == false) {
+                points.erase(points.begin()+i, points.begin()+numOfPoints);
+                break;
+            }
+        }
+        
+        points[i].set(p);
     }
     
     return streamline;
@@ -168,7 +192,7 @@ void ofxLIC::RK(ofVec2f & p, double h) {
 }
 
 //------------------------------------------------ draw.
-void ofxLIC::draw(int stride) {
+void ofxLIC::draw(int stride, int numOfPoints, int stepSize) {
     if(vecField == NULL) {
         return;
     }
@@ -181,7 +205,7 @@ void ofxLIC::draw(int stride) {
             int i = y * w + x;
             
             ofVec2f & vec = vecField->getVector(i);
-            ofPolyline & poly = getStreamline(x, y, 10, 10);
+            ofPolyline & poly = getStreamline(x, y, numOfPoints, stepSize);
             poly.draw();
         }
     }
