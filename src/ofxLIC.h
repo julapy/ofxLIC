@@ -22,6 +22,7 @@ public:
     virtual int getWidth();
     virtual int getHeight();
     virtual int getSize();
+    virtual void draw(int stride=10, float scale=1.0);
     
     int width;
     int height;
@@ -48,6 +49,7 @@ public:
     void RK(ofVec2f & p, double h);
     
     void draw(int stride=10);
+    void drawDebug();
     
     ofxLICVectorField * vecField;
     bool bVecFieldExternal;
